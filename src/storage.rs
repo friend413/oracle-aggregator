@@ -1,12 +1,10 @@
-use crate::types::OracleConfig;
 use sep_40_oracle::Asset;
 use soroban_sdk::{
-    contracttype, unwrap::UnwrapOptimized, Address, Env, IntoVal, Symbol, TryFromVal, Val, Vec,
+    contracttype, Address, Env, IntoVal, Symbol, TryFromVal, Val,
 };
 
 const ADMIN_KEY: &str = "Admin";
 const IS_INIT_KEY: &str = "IsInit";
-const ASSETS_KEY: &str = "Assets";
 const BASE_KEY: &str = "Base";
 const DECIMALS_KEY: &str = "Decimals";
 const USDC_KEY: &str = "USDC";
@@ -83,45 +81,6 @@ pub fn set_admin(e: &Env, admin: &Address) {
 }
 
 /********** Persistent **********/
-
-pub fn set_assets(e: &Env, assets: &Vec<Asset>) {
-    e.storage()
-        .persistent()
-        .set::<Symbol, Vec<Asset>>(&Symbol::new(e, ASSETS_KEY), assets);
-}
-
-pub fn get_assets(e: &Env) -> Vec<Asset> {
-    e.storage().persistent().extend_ttl(
-        &Symbol::new(e, ASSETS_KEY),
-        LEDGER_THRESHOLD_SHARED,
-        LEDGER_BUMP_SHARED,
-    );
-    e.storage()
-        .persistent()
-        .get::<Symbol, Vec<Asset>>(&Symbol::new(e, ASSETS_KEY))
-        .unwrap()
-}
-
-pub fn set_asset_config(e: &Env, asset: &Asset, config: &OracleConfig) {
-    let key = AggregatorDataKey::AssetConfig(asset.clone());
-    e.storage()
-        .persistent()
-        .set::<AggregatorDataKey, OracleConfig>(&key, config);
-}
-
-pub fn get_asset_config(e: &Env, asset: &Asset) -> OracleConfig {
-    let key = AggregatorDataKey::AssetConfig(asset.clone());
-    e.storage()
-        .persistent()
-        .extend_ttl(&key, LEDGER_THRESHOLD_SHARED, LEDGER_BUMP_SHARED);
-    e.storage().persistent().get(&key).unwrap_optimized()
-}
-
-pub fn has_asset_config(e: &Env, asset: &Asset) -> bool {
-    let key = AggregatorDataKey::AssetConfig(asset.clone());
-    e.storage().persistent().has(&key)
-}
-
 
 pub fn set_base(e: &Env, base: &Asset) {
     e.storage()

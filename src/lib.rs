@@ -5,7 +5,6 @@ extern crate std;
 
 pub mod contract;
 mod errors;
-mod price_data;
 mod storage;
 mod types;
 
