@@ -9,6 +9,9 @@ const IS_INIT_KEY: &str = "IsInit";
 const ASSETS_KEY: &str = "Assets";
 const BASE_KEY: &str = "Base";
 const DECIMALS_KEY: &str = "Decimals";
+const USDC_KEY: &str = "USDC";
+const USDC_ORACLE_KEY: &str = "USDCOrcl";
+const DEFAULT_ORACLE_KEY: &str = "DEFOrcl";
 
 const ONE_DAY_LEDGERS: u32 = 17280; // assumes 5 seconds per ledger on average
 const LEDGER_THRESHOLD_SHARED: u32 = 30 * ONE_DAY_LEDGERS;
@@ -154,6 +157,50 @@ pub fn get_decimals(e: &Env) -> u32 {
         .persistent()
         .get::<Symbol, u32>(&Symbol::new(e, DECIMALS_KEY))
         .unwrap()
+}
+
+pub fn get_usdc(e: &Env) -> Address {
+    e.storage()
+        .instance()
+        .get::<Symbol, Address>(&Symbol::new(e, USDC_KEY))
+        .unwrap()
+}
+
+/// Set the admin address
+pub fn set_usdc(e: &Env, usdc: &Address) {
+    e.storage()
+        .instance()
+        .set::<Symbol, Address>(&Symbol::new(e, USDC_KEY), &usdc);
+}
+
+/// Get the oracle address for USDC
+pub fn get_usdc_oracle(e: &Env) -> Address {
+    e.storage()
+        .instance()
+        .get::<Symbol, Address>(&Symbol::new(e, USDC_ORACLE_KEY))
+        .unwrap()
+}
+
+/// Set the oracle address for USDC
+pub fn set_usdc_oracle(e: &Env, oracle: &Address) {
+    e.storage()
+        .instance()
+        .set::<Symbol, Address>(&Symbol::new(e, USDC_ORACLE_KEY), &oracle);
+}
+
+/// Get the oracle address for all non-USDC assets
+pub fn get_default_oracle(e: &Env) -> Address {
+    e.storage()
+        .instance()
+        .get::<Symbol, Address>(&Symbol::new(e, DEFAULT_ORACLE_KEY))
+        .unwrap()
+}
+
+/// Set the oracle address for all non-USDC assets
+pub fn set_default_oracle(e: &Env, oracle: &Address) {
+    e.storage()
+        .instance()
+        .set::<Symbol, Address>(&Symbol::new(e, DEFAULT_ORACLE_KEY), &oracle);
 }
 
 pub fn set_blocked_status(e: &Env, asset: &Asset, blocked: &bool) {
