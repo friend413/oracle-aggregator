@@ -1,9 +1,9 @@
 use crate::{
-    errors::OracleAggregatorErrors, price_data::normalize_price, storage, types::OracleConfig,
+    errors::OracleAggregatorErrors, storage, 
 };
 use sep_40_oracle::{Asset, PriceData, PriceFeedClient, PriceFeedTrait};
 use soroban_sdk::{
-    contract, contractimpl, panic_with_error, unwrap::UnwrapOptimized, Address, Env, Vec, Symbol
+    contract, contractimpl, panic_with_error, Address, Env, Vec, Symbol
 };
 
 #[contract]
@@ -32,7 +32,10 @@ impl PriceFeedTrait for OracleAggregator {
     }
 
     fn assets(e: Env) -> Vec<Asset> {
-        storage::get_assets(&e)
+        let usdc = storage::get_usdc(&e);
+        let mut oracle_assets = PriceFeedClient::new(&e, &storage::get_default_oracle(&e)).assets();
+        oracle_assets.push_back(Asset::Stellar(usdc));
+        oracle_assets
     }
 
     fn lastprice(e: Env, asset: Asset) -> Option<PriceData> {
@@ -97,15 +100,6 @@ impl OracleAggregator {
         storage::set_decimals(&e, &decimals);
     }
 
-    /// Fetch the confugration of an asset
-    pub fn config(e: Env, asset: Asset) -> OracleConfig {
-        if storage::has_asset_config(&e, &asset) {
-            return storage::get_asset_config(&e, &asset);
-        } else {
-            panic_with_error!(&e, OracleAggregatorErrors::AssetNotFound);
-        }
-    }
-
     /// (Admin only) Block an asset
     ///
     /// ### Arguments
@@ -117,9 +111,6 @@ impl OracleAggregator {
         let admin = storage::get_admin(&e);
         admin.require_auth();
 
-        if !storage::has_asset_config(&e, &asset) {
-            panic_with_error!(&e, OracleAggregatorErrors::AssetNotFound);
-        }
         storage::set_blocked_status(&e, &asset, &true);
     }
 
@@ -134,9 +125,6 @@ impl OracleAggregator {
         let admin = storage::get_admin(&e);
         admin.require_auth();
 
-        if !storage::has_asset_config(&e, &asset) {
-            panic_with_error!(&e, OracleAggregatorErrors::AssetNotFound);
-        }
         storage::set_blocked_status(&e, &asset, &false);
     }
 
