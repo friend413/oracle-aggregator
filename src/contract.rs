@@ -47,12 +47,12 @@ impl PriceFeedTrait for OracleAggregator {
         match asset {
             Asset::Stellar(ref a) if a.clone() == usdc => {
                 let oracle = PriceFeedClient::new(&e, &storage::get_usdc_oracle(&e));
-                oracle.lastprice(&Asset::Other(Symbol::new(&e, "USDC")))
+                oracle.lastprice(&Asset::Stellar(usdc))
             }
             _ => {
                 // 1 CPYT = 1 USDC
                 let oracle = PriceFeedClient::new(&e, &storage::get_default_oracle(&e));
-                oracle.lastprice(&Asset::Other(Symbol::new(&e, "USDC")))
+                oracle.lastprice(&Asset::Stellar(usdc))
             }
         }
     }
